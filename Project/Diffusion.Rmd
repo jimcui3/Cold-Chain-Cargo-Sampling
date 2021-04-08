@@ -1,0 +1,68 @@
+---
+title: 'Case2: diffusion'
+author: "Jiaheng Cui"
+output: html_document
+runtime: shiny_prerendered
+---
+
+```{r include=FALSE}
+library(DataComputing)
+library(tidyr)
+library(printr)
+library(dplyr)
+library(ggplot2)
+```
+已知一共有$1,2,...,N=100$箱货物，排成一排，每箱货物有100个物品。两个货物的距离为两个货物编号的差。同时已知感染率随位置变化的函数，假设为$f(d) = 0.01 - 0.0099 * \frac{d}{N-1}$，即线性衰减，感染源的感染率为1%，每远离距离1，感染率下降$0.009/(N-1)$，可能最低的感染率为0.1%。
+
+```{r}
+N <- 100
+infection_rate <- function(dist){
+  return (0.01 - 0.009 * dist/(N-1))
+}
+```
+
+外层循环：
+
+先上帝视角给定一个感染源位置，其位置为$1, 2, ..., \lceil \frac{N}{2} \rceil$的所有可能值，随循环而变化。
+
+中层循环：
+
+进行如下分层：假如分为H层，且N能整除H，那么每N/H个货物分为一层。H为N所有的因子？
+
+(或者为给定的数，从两端开始逐渐分组，最终让这一批货箱的中心为无法整除部分，如一共N=5个货箱，H=2，则{1,2}为一组，{4,5}为一组，剩下的为3,为第三组。)这个算法有问题，暂时不研究
+
+内层循环：
+
+类似两层的情况，但是层数不固定，如何做sampling？
+
+对n求bootstrap，每次保存(n,H，感染源位置)
+
+内层循环结束
+
+中层循环结束
+
+外层循环结束
+
+最后得到的结果为(n,H，感染源位置)，即可以看一下n与感染源位置和H的关系
+```{r}
+for (i in 1:ceiling(N/2)){ # Start of the outer loop
+  source <- i
+  for(H in c(2,5,10,20,50,100)){ # Start of the middle loop
+    data <- matrix(1:N, nrow = H, ncol = N/H, byrow = TRUE) # data[i,] is the i-th strata
+    detection_rate <- 0
+    while(detection_rate < 0.99)
+    #x <- sample() # Here should be the sampling process that estimates n.
+  }
+}
+```
+
+草稿区：
+```{r}
+N <- 10
+H <- 5
+strata <- matrix(1:N, nrow = H, ncol = N/H, byrow = TRUE)
+strata
+infection <- infection_rate(strata-1)
+infection
+rbinom(100, 1, prob = infection[i,j]) # infection[i,j] is the infection rate of (i-1)*N/H+j -th sample
+```
